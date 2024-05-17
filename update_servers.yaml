@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Update Server Software Sources
+    apt:
+      update_cache: yes
+
+  - name: Upgrade Server Software Packages
+    apt:
+      upgrade: yes
