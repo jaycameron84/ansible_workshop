@@ -7,7 +7,20 @@
   - name: Update Server Software Sources
     apt:
       update_cache: yes
+    when: ansible_distribution == "Ubuntu"
 
   - name: Upgrade Server Software Packages
     apt:
       upgrade: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+  - name: Update Server Software Sources
+    apt:
+      update_cache: yes
+    when: ansible_distribution == "Debian"
+
+  - name: Upgrade Server Software Packages
+    apt:
+      upgrade: yes
+    when: ansible_distribution == "Debian"
