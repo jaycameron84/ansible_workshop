@@ -5,12 +5,14 @@
   pre_tasks: # Pre-tasks happen first, before other plays.
 
   - name: install updates (CentOS)
+    tags: always
     dnf: 
       update_only: yes
       update_cache: yes
     when: ansible_distribution == "CentOS"
 
   - name: install updates (Ubuntu, Debian)
+    tags: always
     apt:
       upgrade: dist
       update_cache: yes
@@ -21,16 +23,18 @@
   tasks:
 
   - name: install apache2 and php support packages for Ubuntu
+    tags: apache,apache2,ubuntu
     apt:
-      name: 
+      name:
         - apache2
         - libapache2-mod-php
       state: latest
     when: ansible_distribution == "Ubuntu"
 
   - name: install apache2 and php support packages for Debian
+    tags: apache,debian,httpd
     apt:
-      name: 
+      name:
       - apache2
       - libapache2-mod-php
       state: latest
@@ -39,9 +43,20 @@
 - hosts: db_servers
   become: true
   tasks:
- 
+
   - name: Install MySQL (Ubuntu)
-    apt: 
+    tags: ubuntu,db,mysql
+    apt:
       name: mysql-server
       state: latest
-    when: ansible_distribution == "Ubuntu" 
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: Install Samba Package
+    tags: samba
+    package:
+      name: samba
+      state: latest 
