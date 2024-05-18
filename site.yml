@@ -1,0 +1,47 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks: # Pre-tasks happen first, before other plays.
+
+  - name: install updates (CentOS)
+    dnf: 
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates (Ubuntu, Debian)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu" or ansible_distribution == "Debian"
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache2 and php support packages for Ubuntu
+    apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install apache2 and php support packages for Debian
+    apt:
+      name: 
+      - apache2
+      - libapache2-mod-php
+      state: latest
+    when: ansible_distribution == "Debian"
+
+- hosts: db_servers
+  become: true
+  tasks:
+ 
+  - name: Install MySQL (Ubuntu)
+    apt: 
+      name: mysql-server
+      state: latest
+    when: ansible_distribution == "Ubuntu" 
