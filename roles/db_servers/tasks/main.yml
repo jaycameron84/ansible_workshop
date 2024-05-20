@@ -1,0 +1,6 @@
+- name: Install MySQL (Ubuntu)
+  tags: ubuntu,db,mysql
+  apt:
+    name: mysql-server
+    state: latest
+  when: ansible_distribution == "Ubuntu"

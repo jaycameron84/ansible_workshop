@@ -21,122 +21,28 @@
 - hosts: all
   become: true
   tasks:
-
-  - name: add ssh key for ansibleuser
-    tags: always
-    authorized_key:
-      user: ansibleuser
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJPLbZ8k1HpdWVzoVBgbRjIoy5P1tRUW27E0y/kmYmy6 ansible"
+  roles:
+    - base
 
 - hosts: workstations
   become: true
-  tasks:
-
-  - name: install unzip
-    package:
-      name: unzip
-
-  - name: Check for Terraform Installation
-    stat:
-      path: /usr/local/bin/terraform
-    register: terraform_exists
-
-  - name: install terraform
-    unarchive:
-      src: https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
-      dest: /usr/local/bin
-      remote_src: yes
-      mode: 0755
-      owner: root
-      group: root
-    when: not terraform_exists.stat.exists
+  roles:
+  - workstations
 
 - hosts: web_servers
   become: true
-  tasks:
-
-  - name: install apache2 and php support packages for Ubuntu
-    tags: apache,apache2,ubuntu
-    apt:
-      name:
-        - apache2
-        - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache2 and php support packages for Debian
-    tags: apache,debian,httpd
-    apt:
-      name:
-      - apache2
-      - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Debian"
-
-  - name: Install apache (httpd) on Centos
-    tags: apache,apache2,centos
-    yum:
-      name:
-      - httpd
-      - php-fpm
-      state: latest
-    when: ansible_distribution == "CentOS"
-
-  - name: copy default html for site
-    tags: apache, apache2, httpd
-    copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
-
-  - name: Start Apache2 Web Server on Centos
-    tags: apache,apache2,centos
-    service:
-      name: httpd
-      state: started
-      enabled: yes
-    when: ansible_distribution == "CentOS"
-
-  - name: Add Firewall Exception to CentOS for Apache
-    tags: apache,apache2,centos
-    ansible.builtin.command: firewall-cmd --add-port=80/tcp
-    when: ansible_distribution == "CentOS"
-
-  - name: Change e-mail address for admin
-    tags: apache,centos,httpd
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin jaycameron84@gmail.com
-    when: ansible_distribution == "CentOS"
-    register: httpd
-
-  - name: restart httpd (CentOS)
-    tags: apache,centos,httpd
-    service:
-      name: httpd
-      state: restarted
-    when: httpd.changed
+  roles:
+    - web_servers
 
 - hosts: db_servers
   become: true
-  tasks:
-
-  - name: Install MySQL (Ubuntu)
-    tags: ubuntu,db,mysql
-    apt:
-      name: mysql-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
+  roles:
+    - db_servers
 
 - hosts: file_servers
   become: true
-  tasks:
+  roles:
+    - file_servers
 
-  - name: Install Samba Package
-    tags: samba
-    package:
-      name: samba
-      state: latest
+
+

@@ -1,0 +1,18 @@
+- name: install unzip
+  package:
+    name: unzip
+
+- name: Check for Terraform Installation
+  stat:
+    path: /usr/local/bin/terraform
+  register: terraform_exists
+
+- name: install terraform
+  unarchive:
+    src: https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd6>
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+  when: not terraform_exists.stat.exists
