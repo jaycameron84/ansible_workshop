@@ -4,19 +4,29 @@
   become: true
   pre_tasks: # Pre-tasks happen first, before other plays.
 
-  - name: install updates (CentOS)
+  - name: Update Repo (CentOS)
     tags: always
     dnf:
-      update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "CentOS"
 
-  - name: install updates (Ubuntu, Debian)
+  - name: Update repo (Ubuntu, Debian)
     tags: always
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu" or ansible_distribution == "Debian"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for ansibleuser
+    tags: always
+    authorized_key:
+      user: ansibleuser
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJPLbZ8k1HpdWVzoVBgbRjIoy5P1tRUW27E0y/kmYmy6 ansible"
 
 - hosts: workstations
   become: true
