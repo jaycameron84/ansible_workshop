@@ -1,5 +1,5 @@
-The web invaded maineframe
-sprite and virus battled side by side
-attempting to reclaim the city
-from a rift which open wide
+Ansible Functional Guide Files
+
+This repository is the result of following a working guide to ansible. It manages multiple
+servers to create multiple web servers, a file server, and a database server.
 
