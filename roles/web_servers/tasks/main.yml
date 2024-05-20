@@ -1,29 +1,10 @@
-- name: install apache2 and php support packages for Ubuntu
+- name: install apache2 and php support packages
   tags: apache,apache2,ubuntu
-  apt:
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
-  when: ansible_distribution == "Ubuntu"
-
-- name: install apache2 and php support packages for Debian
-  tags: apache,debian,httpd
-  apt:
-    name:
-    - apache2
-    - libapache2-mod-php
-    state: latest
-  when: ansible_distribution == "Debian"
-
-- name: Install apache (httpd) on Centos
-  tags: apache,apache2,centos
-  yum:
-    name:
-    - httpd
-    - php-fpm
-    state: latest
-  when: ansible_distribution == "CentOS"
 
 - name: copy default html for site
   tags: apache, apache2, httpd
@@ -37,10 +18,9 @@
 - name: Start Apache2 Web Server on Centos
   tags: apache,apache2,centos
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: started
     enabled: yes
-  when: ansible_distribution == "CentOS"
 
 - name: Add Firewall Exception to CentOS for Apache
   tags: apache,apache2,centos
@@ -52,13 +32,7 @@
   lineinfile:
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin'
-    line: ServerAdmin jaycameron84@gmail.com
+    line: ServerAdmin printnplayjay@gmail.com
   when: ansible_distribution == "CentOS"
-  register: httpd
+  notify: restart_apache
 
-- name: restart httpd (CentOS)
-  tags: apache,centos,httpd
-  service:
-    name: httpd
-    state: restarted
-  when: httpd.changed
