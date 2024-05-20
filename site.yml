@@ -6,7 +6,7 @@
 
   - name: install updates (CentOS)
     tags: always
-    dnf: 
+    dnf:
       update_only: yes
       update_cache: yes
     when: ansible_distribution == "CentOS"
@@ -26,6 +26,11 @@
     package:
       name: unzip
 
+  - name: Check for Terraform Installation
+    stat:
+      path: /usr/local/bin/terraform
+    register: terraform_exists
+
   - name: install terraform
     unarchive:
       src: https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
@@ -34,6 +39,7 @@
       mode: 0755
       owner: root
       group: root
+    when: not terraform_exists.stat.exists
 
 - hosts: web_servers
   become: true
@@ -57,6 +63,15 @@
       state: latest
     when: ansible_distribution == "Debian"
 
+  - name: Install apache (httpd) on Centos
+    tags: apache,apache2,centos
+    yum:
+      name:
+      - httpd
+      - php-fpm
+      state: latest
+    when: ansible_distribution == "CentOS"
+
   - name: copy default html for site
     tags: apache, apache2, httpd
     copy:
@@ -65,6 +80,35 @@
       owner: root
       group: root
       mode: 0644
+
+  - name: Start Apache2 Web Server on Centos
+    tags: apache,apache2,centos
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: Add Firewall Exception to CentOS for Apache
+    tags: apache,apache2,centos
+    ansible.builtin.command: firewall-cmd --add-port=80/tcp
+    when: ansible_distribution == "CentOS"
+
+  - name: Change e-mail address for admin
+    tags: apache,centos,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin jaycameron84@gmail.com
+    when: ansible_distribution == "CentOS"
+    register: httpd
+
+  - name: restart httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
 - hosts: db_servers
   become: true
@@ -85,4 +129,4 @@
     tags: samba
     package:
       name: samba
-      state: latest 
+      state: latest
